@@ -600,4 +600,11 @@
         function resetButtons() {
             speakBtn.disabled = false;
             recordBtn.disabled = false;
-            // Next button state is now handled by auto-advance or end of level
+        }
+
+        // Initialize the app when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', initializeSpeechAPI);
+
+    </script>
+</body>
+</html>
