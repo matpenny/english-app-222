@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprende Inglés</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .app-container {
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            position: relative; /* For absolute positioning of messages */
+        }
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 0.75rem; /* Rounded buttons */
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background-color: #4f46e5; /* Indigo */
+            color: white;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+        }
+        .btn-primary:hover {
+            background-color: #4338ca; /* Darker indigo */
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background-color: #e0e7ff; /* Light indigo */
+            color: #4f46e5; /* Indigo */
+        }
+        .btn-secondary:hover {
+            background-color: #c7d2fe; /* Lighter indigo */
+            transform: translateY(-2px);
+        }
+        .btn-success {
+            background-color: #10b981; /* Emerald green */
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #059669; /* Darker emerald */
+        }
+        .btn-danger {
+            background-color: #ef4444; /* Red */
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #dc2626; /* Darker red */
+        }
+        .level-selection button {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        .exercise-area {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .phrase-display {
+            background-color: #f8fafc; /* Lightest blue-gray */
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: #1a202c; /* Dark gray text */
+            font-weight: 500;
+        }
+        .user-input-display {
+            background-color: #fff;
+            border: 1px dashed #94a3b8;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: #4a5568;
+            font-style: italic;
+        }
+        .feedback-message {
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            color: white;
+            display: none; /* Hidden by default */
+        }
+        .feedback-correct {
+            background-color: #10b981; /* Emerald */
+        }
+        .feedback-incorrect {
+            background-color: #ef4444; /* Red */
+        }
+        .feedback-info {
+            background-color: #3b82f6; /* Blue */
+        }
+        .recording-indicator {
+            display: none;
+            width: 20px;
+            height: 20px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite ease-in-out;
+            margin-left: 10px;
+        }
+        .recording-indicator.active {
+            display: block;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.7; }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .app-container {
+                padding: 1.5rem;
+                border-radius: 1rem;
+            }
+            .phrase-display {
+                font-size: 1.1rem;
+                padding: 1rem;
+            }
+            .user-input-display {
+                font-size: 0.9rem;
+                padding: 0.8rem;
+            }
+            .btn {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body class="selection:bg-indigo-300 selection:text-indigo-900">
+    <div class="app-container">
+        <h1 class="text-3xl font-bold text-gray-800 mb-0">Aprende Inglés</h1>
+        <p class="text-lg font-medium text-gray-500 mt-0">Tom's App</p>
+        <p class="text-gray-600 mb-6">Elige tu nivel para empezar a practicar:</p>
+
+        <!-- Level Selection Screen -->
+        <div id="level-selection-screen" class="level-selection">
+            <button id="beginner-btn" class="btn btn-primary">Principiante</button>
+            <button id="medium-btn" class="btn btn-primary">Intermedio</button>
+            <button id="expert-btn" class="btn btn-primary">Experto</button>
+        </div>
+
+        <!-- Learning Area (initially hidden) -->
+        <div id="learning-area" class="exercise-area hidden">
+            <h2 id="level-title" class="text-2xl font-semibold text-gray-700 mb-4"></h2>
+
+            <!-- Exercise Display -->
+            <div class="phrase-display" id="current-phrase-display">
+                <!-- Exercise content will be displayed here -->
+            </div>
+
+            <!-- User Input Display -->
+            <div class="user-input-display" id="user-speech-display">
+                <!-- User's transcribed speech will appear here -->
+            </div>
+
+            <!-- Feedback Message -->
+            <div id="feedback-message" class="feedback-message">
+                <!-- Feedback (correct/incorrect) will appear here -->
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row justify-center gap-4 mt-4">
+                <button id="speak-btn" class="btn btn-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                        <path d="M11.5 2.25a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-1.5 0V3a.75.75 0 0 1 .75-.75ZM16.25 7.25a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-1.5 0V8a.75.75 0 0 1 .75-.75ZM7.25 7.25a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-1.5 0V8a.75.75 0 0 1 .75-.75ZM6 17.25a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H6a.75.75 0 0 1-.75-.75ZM12 12.25a3.25 3.25 0 1 0 0 6.5 3.25 3.25 0 0 0 0-6.5Z" />
+                        <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM4.5 12a7.5 7.5 0 0 0 7.5 7.5c.703 0 1.38-.097 2.02-.284a.75.75 0 0 0-.716-1.446 6 6 0 0 1-1.304.156 6 6 0 0 1-3.664-10.854.75.75 0 0 0-.146-.865 7.465 7.465 0 0 0-6.024-1.2L4.5 12Z" clip-rule="evenodd" />
+                    </svg>
+                    Escuchar
+                </button>
+                <button id="record-btn" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                        <path d="M8.25 4.5a3.75 3.75 0 1 1 7.5 0v.75m-7.5 0h7.5m-7.5 0-1.125-.919A4.505 4.505 0 0 1 3.75 6v.75c0 .716.351 1.372.924 1.766l.001.006a1.5 1.5 0 0 0 1.124 2.044l.75.043a4.5 4.5 0 0 1 1.454.237.75.75 0 0 0 .734-.211 6.75 6.75 0 0 0 3.114-6.29c.883.085 1.772.11 2.66.084a6.75 6.75 0 0 0 3.113 6.29.75.75 0 0 0 .734.211 4.5 4.5 0 0 1 1.454-.237l.75-.043a1.5 1.5 0 0 0 1.124-2.044l.001-.006A4.505 4.505 0 0 1 20.25 6V4.5A3.75 3.75 0 0 0 16.5 2.25h-9A3.75 3.75 0 0 0 3 6v.75c0 1.06.474 2.078 1.318 2.75l.001.006a3 3 0 0 0 2.25 4.06l.75.043a6 6 0 0 1 1.936.319.75.75 0 0 0 .734-.211 6.75 6.75 0 0 0 3.114-6.29c.883.085 1.772.11 2.66.084a6.75 6.75 0 0 0 3.113 6.29.75.75 0 0 0 .734.211 6 6 0 0 1 1.936.319l.75.043a3 3 0 0 0 2.25-4.06l.001-.006A4.505 4.505 0 0 1 21 6V4.5A3.75 3.75 0 0 0 17.25 2.25h-9Z" />
+                    </svg>
+                    Hablar
+                    <span id="recording-indicator" class="recording-indicator"></span>
+                </button>
+                <button id="next-btn" class="btn btn-success hidden">Siguiente</button>
+            </div>
+        </div>
+
+        <!-- No Speech API Support Message -->
+        <div id="no-api-support" class="hidden text-red-600 font-semibold mt-4">
+            Tu navegador no soporta la API de Voz. Por favor, usa Chrome en Android/Desktop o Safari en iOS para la funcionalidad completa.
+        </div>
+    </div>
+
+    <script>
+        // Check for Web Speech API support
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const SpeechSynthesis = window.speechSynthesis;
+
+        // Global Speech API instances, initialized immediately if available
+        let recognition = SpeechRecognition ? new SpeechRecognition() : null;
+        let synth = SpeechSynthesis || null;
+
+        // UI Elements
+        const levelSelectionScreen = document.getElementById('level-selection-screen');
+        const learningArea = document.getElementById('learning-area');
+        const levelTitle = document.getElementById('level-title');
+        const currentPhraseDisplay = document.getElementById('current-phrase-display');
+        const userSpeechDisplay = document.getElementById('user-speech-display');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const speakBtn = document.getElementById('speak-btn');
+        const recordBtn = document.getElementById('record-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const recordingIndicator = document.getElementById('recording-indicator');
+        const noApiSupportMessage = document.getElementById('no-api-support');
+
+        // Level Buttons
+        document.getElementById('beginner-btn').addEventListener('click', () => selectLevel('beginner'));
+        document.getElementById('medium-btn').addEventListener('click', () => selectLevel('medium'));
+        document.getElementById('expert-btn').addEventListener('click', () => selectLevel('expert'));
+        nextBtn.addEventListener('click', nextExercise);
+
+        // State variables
+        let currentLevel = '';
+        let currentExerciseIndex = 0;
+        let exercises = {}; // Will be populated with content
+
+        // Define exercise content for each level
+        exercises = {
+            beginner: [
+                {
+                    type: 'listenAndRepeat',
+                    spanish: 'Hola',
+                    english: 'Hello.',
+                    instruction: 'Escucha y repite: "Hello."',
+                    targetLang: 'en-US'
+                },
+                {
+                    type: 'listenAndRepeat',
+                    spanish: 'Buenos días',
+                    english: 'Good morning.',
+                    instruction: 'Escucha y repite: "Good morning."',
+                    targetLang: 'en-US'
+                },
+                {
+                    type: 'translateAndSpeak',
+                    spanish: '¿Cómo estás?',
+                    english: 'How are you?',
+                    instruction: 'Traduce y di en inglés: "¿Cómo estás?"',
+                    targetLang: 'en-US'
+                },
+                {
+                    type: 'translateAndSpeak',
+                    spanish: 'Estoy bien, gracias.',
+                    english: 'I am fine, thank you.',
+                    instruction: 'Traduce y di en inglés: "Estoy bien, gracias."',
+                    targetLang: 'en-US'
+                },
+                {
+                    type: 'listenAndRepeat',
+                    spanish: 'Agua',
+                    english: 'Water.',
+                    instruction: 'Escucha y repite: "Water."',
+                    targetLang: 'en-US'
+                },
+                {
+                    type: 'translateAndSpeak',
+                    spanish: 'Sí',
+                    english: 'Yes.',
+                    instruction: 'Traduce y di en inglés: "Sí"',
+                    targetLang: 'en-US'
+                },
+                {
+                    type: 'listenAndRepeat',
+                    spanish: 'No',
+                    english: 'No.',
+                    instruction: 'Escucha y repite: "No."',
+                    targetLang: 'en-US'
+                },
+            ],
+            medium: [
+                {
+                    type: 'listenAndRepeat',
+                    spanish: 'Me gustaría una cerveza, por favor.',
+                    english: 'I would like a beer, please.',
+                    instruction: 'Escucha y repite: "I would like a beer, please."',
+                    targetLang: 'en-US'
+                },
+                {
+                    type: 'translateAndSpeak',
+                    spanish: '¿Dónde está el baño?',
+                    english: 'Where is the bathroom?',
+                    instruction: 'Traduce y di en inglés: "¿Dónde está el baño?"',
+                    targetLang: 'en-US'
+                },
+                {
+                    type: 'listenAndRepeat',
+                    spanish: '¿Puedes hablar más despacio?',
+                    english: 'Can you speak more slowly?',
+                    instruction: 'Escucha y repite: "Can you speak more slowly?"',
+                    targetLang: 'en-US'
+                },
+                {
+                    type: 'translateAndSpeak',
+                    spanish: 'No entiendo.',
+                    english: 'I don\'t understand.',
+                    instruction: 'Traduce y di en inglés: "No entiendo."',
+                    targetLang: 'en-US'
+                },
+                {
+                    type: 'listenAndRepeat',
+                    spanish: '¿Cuánto cuesta esto?',
+                    english: 'How much does this cost?',
+                    instruction: 'Escucha y repite: "How much does this cost?"',
+                    targetLang: 'en-US'
+                },
+            ],
+            expert: [
+                {
+                    type: 'listenAndRepeat',
+                    spanish: '¿Podría explicarme la diferencia entre "affect" y "effect"?',
+                    english: 'Could you explain the difference between "affect" and "effect"?',
+                    instruction: 'Escucha y repite: "Could you explain the difference between affect and effect?"',
+                    targetLang: 'en-US'
+                },
+                {
+                    type: 'translateAndSpeak',
+                    spanish: 'Estoy buscando mejorar mi fluidez en inglés para mi carrera profesional.',
+                    english: 'I am looking to improve my English fluency for my professional career.',
+                    instruction: 'Traduce y di en inglés: "Estoy buscando mejorar mi fluidez en inglés para mi carrera profesional."',
+                    targetLang: 'en-US'
+                },
+                {
+                    type: 'listenAndRepeat',
+                    spanish: 'La comunicación efectiva es clave para el éxito en cualquier campo.',
+                    english: 'Effective communication is key to success in any field.',
+                    instruction: 'Escucha y repite: "Effective communication is key to success in any field."',
+                    targetLang: 'en-US'
+                },
+                {
+                    type: 'translateAndSpeak',
+                    spanish: 'Me gustaría discutir las implicaciones de la inteligencia artificial en el aprendizaje de idiomas.',
+                    english: 'I would like to discuss the implications of artificial intelligence in language learning.',
+                    instruction: 'Traduce y di en inglés: "Me gustaría discutir las implicaciones de la inteligencia artificial en el aprendizaje de idiomas."',
+                    targetLang: 'en-US'
+                },
+                {
+                    type: 'listenAndRepeat',
+                    spanish: 'El desarrollo de habilidades interculturales es cada vez más importante en nuestro mundo globalizado.',
+                    english: 'Developing intercultural skills is increasingly important in our globalized world.',
+                    instruction: 'Escucha y repite: "Developing intercultural skills is increasingly important in our globalized world."',
+                    targetLang: 'en-US'
+                },
+            ]
+        };
+
+        // Initialize Speech API related event handlers and UI updates
+        function initializeSpeechAPI() {
+            if (recognition && synth) {
+                // Setup recognition event handlers
+                recognition.onstart = () => {
+                    recordingIndicator.classList.add('active');
+                    userSpeechDisplay.textContent = 'Escuchando...';
+                    feedbackMessage.style.display = 'none';
+                    speakBtn.disabled = true;
+                    recordBtn.disabled = true;
+                    nextBtn.disabled = true;
+                };
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    const confidence = event.results[0][0].confidence;
+                    userSpeechDisplay.textContent = `Tú dijiste: "${transcript}"`;
+                    checkAnswer(transcript);
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                    userSpeechDisplay.textContent = 'Error al escuchar. Intenta de nuevo.';
+                    feedbackMessage.className = 'feedback-message feedback-incorrect';
+                    feedbackMessage.textContent = 'Error de reconocimiento de voz. Asegúrate de que el micrófono esté habilitado.';
+                    feedbackMessage.style.display = 'block';
+                    resetButtons();
+                };
+
+                recognition.onend = () => {
+                    recordingIndicator.classList.remove('active');
+                    resetButtons();
+                };
+
+                // Setup synth voices changed listener
+                // This ensures voices are loaded before trying to use them
+                if (synth.getVoices().length === 0) {
+                    synth.onvoiceschanged = () => {
+                        console.log('Voices loaded.');
+                    };
+                }
+
+                // Attach event listeners for speak and record buttons
+                speakBtn.addEventListener('click', () => speakPhrase(exercises[currentLevel][currentExerciseIndex].english, 'en-US'));
+                recordBtn.addEventListener('click', () => startRecognition(exercises[currentLevel][currentExerciseIndex].english, exercises[currentLevel][currentExerciseIndex].targetLang));
+
+            } else {
+                // Show message if API is not supported
+                noApiSupportMessage.classList.remove('hidden');
+                speakBtn.disabled = true;
+                recordBtn.disabled = true;
+            }
+        }
+
+        // Function to select a learning level
+        function selectLevel(level) {
+            currentLevel = level;
+            currentExerciseIndex = 0;
+            levelSelectionScreen.classList.add('hidden');
+            learningArea.classList.remove('hidden');
+            let titleText = '';
+            switch (level) {
+                case 'beginner':
+                    titleText = 'Nivel: Principiante';
+                    break;
+                case 'medium':
+                    titleText = 'Nivel: Intermedio';
+                    break;
+                case 'expert':
+                    titleText = 'Nivel: Experto';
+                    break;
+            }
+            levelTitle.textContent = titleText;
+            loadExercise();
+        }
+
+        // Function to load the current exercise
+        function loadExercise() {
+            const exercise = exercises[currentLevel][currentExerciseIndex];
+            userSpeechDisplay.textContent = ''; // Clear previous speech
+            feedbackMessage.style.display = 'none'; // Hide feedback
+            nextBtn.classList.add('hidden'); // Hide next button until answer is checked
+            resetButtons(); // Enable speak/record buttons
+
+            if (exercise.type === 'listenAndRepeat') {
+                currentPhraseDisplay.innerHTML = `<p>${exercise.instruction}</p><p class="text-gray-500 text-sm mt-2">(${exercise.spanish})</p>`;
+                speakPhrase(exercise.english, 'en-US'); // Automatically speak the English phrase
+            } else if (exercise.type === 'translateAndSpeak') {
+                currentPhraseDisplay.innerHTML = `<p>${exercise.instruction}</p><p class="text-indigo-700 font-bold mt-2 text-xl">"${exercise.spanish}"</p>`;
+                // No automatic speaking for translate, user initiates
+            }
+        }
+
+        // Function to speak a given text
+        function speakPhrase(text, lang) {
+            if (!synth) {
+                console.error('SpeechSynthesis not initialized.');
+                // Fallback or inform user if synth is not available
+                feedbackMessage.className = 'feedback-message feedback-incorrect';
+                feedbackMessage.textContent = 'Error: La función de voz no está disponible en este navegador.';
+                feedbackMessage.style.display = 'block';
+                return;
+            }
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang;
+            utterance.pitch = 1;
+            utterance.rate = 1;
+            utterance.volume = 1;
+
+            // Find a suitable voice if available (optional, but improves quality)
+            const voices = synth.getVoices();
+            let selectedVoice = voices.find(voice => voice.lang === lang && voice.name.includes('Google')); // Prioritize Google voices
+            if (!selectedVoice) {
+                selectedVoice = voices.find(voice => voice.lang === lang); // Fallback to any voice for the language
+            }
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+            } else {
+                console.warn(`No specific voice found for ${lang}. Using default.`);
+            }
+
+            utterance.onend = () => {
+                console.log('Speech finished.');
+                resetButtons();
+            };
+            utterance.onerror = (event) => {
+                console.error('SpeechSynthesis error:', event.error);
+                feedbackMessage.className = 'feedback-message feedback-incorrect';
+                feedbackMessage.textContent = 'Error al reproducir el audio.';
+                feedbackMessage.style.display = 'block';
+                resetButtons();
+            };
+
+            synth.speak(utterance);
+            speakBtn.disabled = true;
+            recordBtn.disabled = true;
+        }
+
+        // Function to start speech recognition
+        function startRecognition(expectedText, targetLang) {
+            if (!recognition) {
+                console.error('SpeechRecognition not initialized.');
+                // Fallback or inform user if recognition is not available
+                feedbackMessage.className = 'feedback-message feedback-incorrect';
+                feedbackMessage.textContent = 'Error: La función de reconocimiento de voz no está disponible en este navegador.';
+                feedbackMessage.style.display = 'block';
+                return;
+            }
+            recognition.lang = targetLang; // Set recognition language
+            recognition.start();
+        }
+
+        // Function to check the user's spoken answer
+        function checkAnswer(userTranscript) {
+            const currentExercise = exercises[currentLevel][currentExerciseIndex];
+            const expectedEnglish = currentExercise.english.toLowerCase().replace(/[.,!?]/g, '').trim();
+            const userSaid = userTranscript.toLowerCase().replace(/[.,!?]/g, '').trim();
+
+            if (userSaid === expectedEnglish) {
+                feedbackMessage.className = 'feedback-message feedback-correct';
+                feedbackMessage.textContent = '¡Correcto! Muy bien.';
+                nextBtn.classList.remove('hidden');
+            } else {
+                feedbackMessage.className = 'feedback-message feedback-incorrect';
+                feedbackMessage.innerHTML = `Incorrecto. Intenta de nuevo.<br>Esperado: "${currentExercise.english}"`;
+                // Optionally, you can re-enable record button to try again
+            }
+            feedbackMessage.style.display = 'block';
+        }
+
+        // Function to move to the next exercise
+        function nextExercise() {
+            currentExerciseIndex++;
+            if (currentExerciseIndex < exercises[currentLevel].length) {
+                loadExercise();
+            } else {
+                // All exercises for this level completed
+                currentPhraseDisplay.textContent = '¡Has completado todos los ejercicios de este nivel!';
+                userSpeechDisplay.textContent = '';
+                feedbackMessage.className = 'feedback-message feedback-info';
+                feedbackMessage.textContent = '¡Felicidades! Puedes elegir otro nivel o repetir este.';
+                feedbackMessage.style.display = 'block';
+                nextBtn.classList.add('hidden'); // Hide next button
+                speakBtn.disabled = true;
+                recordBtn.disabled = true;
+                // Option to go back to level selection
+                const backToLevelsBtn = document.createElement('button');
+                backToLevelsBtn.textContent = 'Volver a elegir nivel';
+                backToLevelsBtn.className = 'btn btn-primary mt-4';
+                backToLevelsBtn.addEventListener('click', () => {
+                    learningArea.classList.add('hidden');
+                    levelSelectionScreen.classList.remove('hidden');
+                    currentExerciseIndex = 0; // Reset index for next time
+                    // Remove the button itself
+                    if (backToLevelsBtn.parentNode) {
+                        backToLevelsBtn.parentNode.removeChild(backToLevelsBtn);
+                    }
+                });
+                learningArea.appendChild(backToLevelsBtn);
+            }
+        }
+
+        // Helper to reset button states
+        function resetButtons() {
+            speakBtn.disabled = false;
+            recordBtn.disabled = false;
+            // Next button state is managed by checkAnswer
+        }
+
+        // Initialize the app when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', initializeSpeechAPI);
+
+    </script>
+</body>
+</html>
