@@ -249,7 +249,7 @@
         document.getElementById('beginner-btn').addEventListener('click', () => selectLevel('beginner'));
         document.getElementById('medium-btn').addEventListener('click', () => selectLevel('medium'));
         document.getElementById('expert-btn').addEventListener('click', () => selectLevel('expert'));
-        nextBtn.addEventListener('click', nextExercise);
+        // nextBtn.addEventListener('click', nextExercise); // Removed manual click for next
 
         // State variables
         let currentLevel = '';
@@ -389,6 +389,10 @@
         function initializeSpeechAPI() {
             if (recognition && synth) {
                 // Setup recognition event handlers
+                recognition.continuous = false; // Listen for a single utterance
+                recognition.interimResults = false; // Only return final results
+                recognition.lang = 'en-US'; // Default recognition language to English
+
                 recognition.onstart = () => {
                     recordingIndicator.classList.add('active');
                     userSpeechDisplay.textContent = 'Escuchando...';
@@ -416,7 +420,7 @@
 
                 recognition.onend = () => {
                     recordingIndicator.classList.remove('active');
-                    resetButtons();
+                    // Buttons are reset by checkAnswer for correct, or here for error/incorrect
                 };
 
                 // Setup synth voices changed listener
@@ -466,7 +470,7 @@
             const exercise = exercises[currentLevel][currentExerciseIndex];
             userSpeechDisplay.textContent = ''; // Clear previous speech
             feedbackMessage.style.display = 'none'; // Hide feedback
-            nextBtn.classList.add('hidden'); // Hide next button until answer is checked
+            nextBtn.classList.add('hidden'); // Hide next button (it's now auto-advanced)
             resetButtons(); // Enable speak/record buttons
 
             if (exercise.type === 'listenAndRepeat') {
@@ -545,14 +549,19 @@
 
             if (userSaid === expectedEnglish) {
                 feedbackMessage.className = 'feedback-message feedback-correct';
-                feedbackMessage.textContent = '¡Correcto! Muy bien.';
-                nextBtn.classList.remove('hidden');
+                feedbackMessage.textContent = '¡Correcto! Muy bien.'; // This is the "Good job!" message
+                feedbackMessage.style.display = 'block';
+                // Automatically advance to the next exercise after a short delay
+                setTimeout(() => {
+                    nextExercise();
+                }, 1500); // 1.5 second delay
             } else {
                 feedbackMessage.className = 'feedback-message feedback-incorrect';
                 feedbackMessage.innerHTML = `Incorrecto. Intenta de nuevo.<br>Esperado: "${currentExercise.english}"`;
-                // Optionally, you can re-enable record button to try again
+                feedbackMessage.style.display = 'block';
+                // Re-enable record button to allow user to try again
+                resetButtons();
             }
-            feedbackMessage.style.display = 'block';
         }
 
         // Function to move to the next exercise
@@ -567,7 +576,7 @@
                 feedbackMessage.className = 'feedback-message feedback-info';
                 feedbackMessage.textContent = '¡Felicidades! Puedes elegir otro nivel o repetir este.';
                 feedbackMessage.style.display = 'block';
-                nextBtn.classList.add('hidden'); // Hide next button
+                nextBtn.classList.add('hidden'); // Ensure next button is hidden
                 speakBtn.disabled = true;
                 recordBtn.disabled = true;
                 // Option to go back to level selection
@@ -591,12 +600,4 @@
         function resetButtons() {
             speakBtn.disabled = false;
             recordBtn.disabled = false;
-            // Next button state is managed by checkAnswer
-        }
-
-        // Initialize the app when the DOM is fully loaded
-        document.addEventListener('DOMContentLoaded', initializeSpeechAPI);
-
-    </script>
-</body>
-</html>
+            // Next button state is now handled by auto-advance or end of level
